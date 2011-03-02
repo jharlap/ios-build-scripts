@@ -2,24 +2,25 @@
 # Below are required environment variables with some example content:
 # XCODE_BUILD_COMMAND='xcodebuild -sdk iphoneos4.1 -alltargets -configuration "Ad Hoc" clean build'
 # XCODE_BUILD_CONFIGURATION='Ad Hoc'
-# DISTRIBUTION_CERTIFICATE='iPhone Distribution: Your Company Pty Ltd'
+# DISTRIBUTION_CERTIFICATE='iPhone Distribution: Handprint Corporation'
 # PROVISIONING_PROFILE_PATH='/Users/tomcat/Library/MobileDevice/Provisioning Profiles/Your_Company_Ad_Hoc.mobileprovision'
-# GIT_BINARY='/usr/local/git/bin/git'
+# HG_BINARY='/usr/local/bin/hg'
 # REMOTE_HOST='your.remote.host.com'
 # REMOTE_PARENT_PATH='/www/docs/ios_builds'
-# MANIFEST_SCRIPT_LOCATION='http://github.com/baz/ios-build-scripts/raw/master/generate_manifest.py'
+# MANIFEST_SCRIPT_LOCATION='https://github.com/jharlap/ios-build-scripts/raw/master/generate_manifest.py'
 # ROOT_DEPLOYMENT_ADDRESS='http://your.remote.host.com/ios_builds'
 # ARCHIVE_FILENAME='beta_archive.zip'
 # KEYCHAIN_LOCATION='/Users/tomcat/Library/Keychains/Your Company.keychain'
 # KEYCHAIN_PASSWORD='Password'
 
 # Build project
-security default-keychain -s "$KEYCHAIN_LOCATION"
-security unlock-keychain -p $KEYCHAIN_PASSWORD "$KEYCHAIN_LOCATION"
-eval $XCODE_BUILD_COMMAND
+#security default-keychain -s "$KEYCHAIN_LOCATION"
+#security unlock-keychain -p $KEYCHAIN_PASSWORD "$KEYCHAIN_LOCATION"
+#eval $XCODE_BUILD_COMMAND
 
-GIT_HASH="$($GIT_BINARY log --pretty=format:'' | wc -l)-$($GIT_BINARY rev-parse --short HEAD)"
-GIT_HASH=${GIT_HASH//[[:space:]]}
+HG_HASH="$($HG_BINARY identify -n)-$($HG_BINARY identify -i)"
+HG_HASH=${HG_HASH//[[:space:]]}
+HG_HASH=${HG_HASH//+}
 BUILD_DIRECTORY="$(pwd)/build/${XCODE_BUILD_CONFIGURATION}-iphoneos"
 cd "$BUILD_DIRECTORY" || die "Build directory does not exist."
 MANIFEST_SCRIPT=$(curl -fsS $MANIFEST_SCRIPT_LOCATION)
@@ -46,9 +47,9 @@ for APP_FILENAME in *.app; do
 	tar -cf $PAYLOAD_FILENAME "$IPA_FILENAME" "$DSYM_FILEPATH" "$ARCHIVE_FILENAME" "$MANIFEST_OUTPUT_HTML_FILENAME" "$MANIFEST_OUTPUT_MANIFEST_FILENAME"
 
 	QUOTE='"'
-	ssh $REMOTE_HOST "cd $REMOTE_PARENT_PATH; rm -rf ${QUOTE}$APP_NAME${QUOTE}/$GIT_HASH; mkdir -p ${QUOTE}$APP_NAME${QUOTE}/$GIT_HASH;"
-	scp "$PAYLOAD_FILENAME" "$REMOTE_HOST:$REMOTE_PARENT_PATH/${QUOTE}$APP_NAME${QUOTE}/$GIT_HASH"
-	ssh $REMOTE_HOST "cd $REMOTE_PARENT_PATH/${QUOTE}$APP_NAME${QUOTE}/$GIT_HASH; tar -xf $PAYLOAD_FILENAME; rm $PAYLOAD_FILENAME"
+	ssh $REMOTE_HOST "cd $REMOTE_PARENT_PATH; rm -rf ${QUOTE}$APP_NAME${QUOTE}/$HG_HASH; mkdir -p ${QUOTE}$APP_NAME${QUOTE}/$HG_HASH;"
+	scp "$PAYLOAD_FILENAME" "$REMOTE_HOST:$REMOTE_PARENT_PATH/${QUOTE}$APP_NAME${QUOTE}/$HG_HASH"
+	ssh $REMOTE_HOST "cd $REMOTE_PARENT_PATH/${QUOTE}$APP_NAME${QUOTE}/$HG_HASH; tar -xf $PAYLOAD_FILENAME; rm $PAYLOAD_FILENAME"
 
 	# Clean up
 	rm "$IPA_FILENAME"
