@@ -42,7 +42,7 @@ for APP_FILENAME in *.app; do
 	rm "$PROVISIONING_PROFILE_FILENAME"
 
 	# Output of this is index.html and manifest.plist
-	python -c "$MANIFEST_SCRIPT" -f "$APP_FILENAME" -d "$ROOT_DEPLOYMENT_ADDRESS/$APP_NAME/$HG_HASH/$MANIFEST_OUTPUT_MANIFEST_FILENAME" -a "$ARCHIVE_FILENAME" -c "$BUILD_CHANGES"
+	python -c "$MANIFEST_SCRIPT" -f "$APP_FILENAME" -d "$ROOT_DEPLOYMENT_ADDRESS/$HG_HASH/$MANIFEST_OUTPUT_MANIFEST_FILENAME" -a "$ARCHIVE_FILENAME" -c "$BUILD_CHANGES"
 
 	# Create tarball with .ipa, dSYM directory, legacy build and generated manifest files and scp them all across
 	PAYLOAD_FILENAME='payload.tar'
