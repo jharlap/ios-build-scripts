@@ -17,7 +17,7 @@
 # Build project
 #security default-keychain -s "$KEYCHAIN_LOCATION"
 #security unlock-keychain -p $KEYCHAIN_PASSWORD "$KEYCHAIN_LOCATION"
-eval $XCODE_BUILD_COMMAND
+eval $XCODE_BUILD_COMMAND || exit 1
 
 HG_HASH="$($HG_BINARY identify -n)-$($HG_BINARY identify -i)"
 HG_HASH=${HG_HASH//[[:space:]]}
